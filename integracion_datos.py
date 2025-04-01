@@ -7,7 +7,7 @@ import os
 
 
 def cargar_costos_turisticos():
-    ruta = "Lab07-DB2/data/MONGO/"
+    ruta = "./data/MONGO/"
     archivos_json = glob(os.path.join(ruta, "costos_turisticos_*.json"))
     lista_paises = []
 
@@ -22,10 +22,9 @@ def cargar_costos_turisticos():
 
 # === CARGA DE DATOS ADICIONALES ===
 
-
 def cargar_datos_adicionales():
-    ruta_mongo = "Lab07-DB2/data/MONGO/"
-    ruta_sql = "Lab07-DB2/data/SQL/"
+    ruta_mongo = "./data/MONGO/"
+    ruta_sql = "./data/SQL/"
 
     df_bigmac = pd.read_json(os.path.join(ruta_mongo, "paises_mundo_big_mac.json"))
 
@@ -99,25 +98,35 @@ def limpiar_datos(df):
 
 
 def main():
-    print("📥 Cargando datos...")
+    print("Cargando datos...")
     df_costos = cargar_costos_turisticos()
     df_bigmac, df_poblacion, df_envejecimiento = cargar_datos_adicionales()
 
-    print("🔗 Integrando fuentes...")
+    print("Integrando fuentes...")
     df_completo = integrar_datos(df_costos, df_bigmac, df_poblacion, df_envejecimiento)
 
-    print("🧼 Limpiando y transformando datos...")
+    print("Limpiando y transformando datos...")
     df_final = limpiar_datos(df_completo)
 
-    print("📊 Vista previa de los datos integrados:")
+    print("Vista previa de los datos integrados:")
     print(df_final.head())
+
+    print("verificar que no hayan nulls")
+    print(df_final.isnull().sum())
+
+    #rellenar los nulls con nana
+    df_final.fillna("NaN", inplace=True)
+    print("verificar que no hayan nulls después de la relleno con NaN")
+    print(df_final.isnull().sum())
+
+    #verificar los datos suplicados
+    print("verificar que no hayan duplicados")
+    print(df_final.duplicated().sum())
 
     os.makedirs("Lab07-DB2/data/NewData", exist_ok=True)
 
     output_path = "Lab07-DB2/data/NewData/datos_integrados.csv"
-    print(f"💾 Guardando en archivo CSV: {output_path}")
+    print(f"Guardando en archivo CSV: {output_path}")
     df_final.to_csv(output_path, index=False)
 
-
-if __name__ == "__main__":
-    main()
+main()
